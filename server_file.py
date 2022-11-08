@@ -6,48 +6,35 @@ Created on Tue Nov  8 16:14:14 2022
 """
 
 # using flask_restful
-from flask import Flask, jsonify, request
+from flask import Flask, send_file
 from flask_restful import Resource, Api
+import finalysis_task
   
 # creating the flask app
 app = Flask(__name__)
 # creating an API object
 api = Api(app)
-  
-# making a class for a particular resource
-# the get, post methods correspond to get and post requests
-# they are automatically mapped by flask_restful.
-# other methods include put, delete, etc.
-class Hello(Resource):
-  
-    # corresponds to the GET request.
-    # this function is called whenever there
-    # is a GET request for this resource
-    def get(self):
-  
-        return jsonify({'message': 'hello world'})
-  
-    # Corresponds to POST request
-    def post(self):
-          
-        data = request.get_json()     # status code
-        return jsonify({'data': data}), 201
-  
+
+class no_op(Resource):
+    def get(self, date):
+        finalysis_task.corr_matrix_cal(date, 'csv')
+        return send_file('iss_aapl_correlation_matrix.csv')
   
 # another resource to calculate the square of a number
-class Square(Resource):
-  
-    def get(self, num):
-  
-        return jsonify({'square': num**2})
+class get_matrix(Resource):
+    def get(self, date, output_mode="csv"):
+        finalysis_task.corr_matrix_cal(date, output_mode)
+        if(output_mode=='html'):
+            return send_file('iss_aapl_correlation_matrix.html')
+        else:
+            return send_file('iss_aapl_correlation_matrix.csv')
   
   
 # adding the defined resources along with their corresponding urls
-api.add_resource(Hello, '/')
-api.add_resource(Square, '/square/<int:num>')
+api.add_resource(no_op, '/<string:date>/')
+api.add_resource(get_matrix, '/<string:date>/<string:output_mode>')
   
   
 # driver function
 if __name__ == '__main__':
-  
     app.run(debug = True)
