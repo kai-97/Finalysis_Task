@@ -6,12 +6,7 @@ Created on Tue Nov  8 12:06:10 2022
 """
 
 import pandas as pd
-import time
 import urllib3
-import json
-import datetime
-
-import datetime
 import ephem
 from math import degrees
 ## Collect the data
@@ -35,9 +30,9 @@ line3 = tle[2]
 
 times = filter_data['timestamp']
 iss_aapl_location_data = []
+iss = ephem.readtle(line1, line2, line3)
 ite = 0
 for t in times:
-    iss = ephem.readtle(line1, line2, line3)
     to_find_time = t.replace('2019','2022')
     iss.compute(to_find_time)
     iss_aapl_location_data.append([to_find_time, degrees(iss.sublong), degrees(iss.sublat), filter_data.iloc[ite][1],
@@ -46,8 +41,10 @@ for t in times:
 iss_aapl_location_data = pd.DataFrame(iss_aapl_location_data)
 iss_aapl_location_data.columns = ['timestamp', 'longitude', 'latitude', 'open','high','low','close','volume']
 
-print(iss_aapl_location_data.corr())
+correlation_result = (iss_aapl_location_data.corr())
 
-#print(filter_data)
-#iss_aapl_data = pd.merge(filter_data, iss_location_data, on="timestamp")
-#print(iss_aapl_data)
+output_mode = 'html'
+if(output_mode=='html'):
+    correlation_result.to_html('iss_aapl_correlation_matrix.html')
+else:
+    correlation_result.to_csv('iss_aapl_correlation_matrix.csv')
