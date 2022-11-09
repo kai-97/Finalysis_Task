@@ -17,13 +17,16 @@ api = Api(app)
 
 class no_op(Resource):
     def get(self, date):
+        # returning a csv in case no output format is mentioned
         finalysis_task.corr_matrix_cal(date, 'csv')
         return send_file('iss_aapl_correlation_matrix.csv')
   
 # another resource to calculate the square of a number
 class get_matrix(Resource):
     def get(self, date, output_mode="csv"):
+        # Calling the method for calculating the correlation matrix and fetching the data
         finalysis_task.corr_matrix_cal(date, output_mode)
+        # Ouptut as per the format mentioned
         if(output_mode=='html'):
             return send_file('iss_aapl_correlation_matrix.html')
         else:
